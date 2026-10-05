@@ -184,7 +184,7 @@ const initializeWindows = () => {
     const addClickEvent = (el, fn) => {
         for (const item of ["Link", "Button"]) {
             if (document.getElementById(el + item))
-                document.getElementById(el + item).addEventListener("click", fn);
+                document.getElementById(el + item).addEventListener("click", (event) => fn(event));
         }
     };
 
@@ -383,7 +383,7 @@ const initializeWindows = () => {
         for (const hash of hashes) {
             const row = torrentsTable.getRow(hash).full_data;
             const origValues = `${row.ratio_limit}|${row.seeding_time_limit}|${row.inactive_seeding_time_limit}|${row.max_ratio}`
-                + `|${row.max_seeding_time}|${row.max_inactive_seeding_time}|${row.share_limit_action}`;
+                + `|${row.max_seeding_time}|${row.max_inactive_seeding_time}|${row.share_limit_action}|${row.share_limits_mode}`;
 
             // initialize value
             if (shareRatio === null)
