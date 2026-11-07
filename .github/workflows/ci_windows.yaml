@@ -114,7 +114,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: "6.11.2"
+          version: "6.12.0"
           arch: ${{ matrix.config.qt_arch }}
           archives: qtbase qtsvg qttools
           modules: qtimageformats
@@ -223,7 +223,7 @@ jobs:
       - name: Install NSIS
         uses: repolevedavaj/install-nsis@65a75ea79c3d1ddde868e98b7f9447e2e623401c # v1.3.0
         with:
-          nsis-version: '3.12'
+          nsis-version: '3.13'
 
       - name: Create installer
         run: |
