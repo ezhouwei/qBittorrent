@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   ci:
-    name: Build (${{ matrix.libtorrent.version }}, ${{ matrix.config.arch }})
+    name: Build (${{ matrix.libtorrent.version }}, ${{ matrix.qt_version }}, ${{ matrix.config.arch }})
     runs-on: ${{ matrix.config.os }}
     permissions:
       actions: write
