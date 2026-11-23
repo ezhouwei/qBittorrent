@@ -1,6 +1,7 @@
 name: CI - Windows
 
-on: [pull_request, push]
+on:
+  workflow_dispatch:
 
 permissions: {}
 
@@ -10,7 +11,7 @@ concurrency:
 
 jobs:
   ci:
-    name: Build (${{ matrix.libtorrent.version }}, ${{ matrix.qt_version }}, ${{ matrix.config.arch }})
+    name: Build (${{ matrix.libtorrent.version }}, ${{ matrix.config.arch }})
     runs-on: ${{ matrix.config.os }}
     permissions:
       actions: write
@@ -19,25 +20,12 @@ jobs:
       fail-fast: false
       matrix:
         libtorrent:
-          - version: "2.1.2"
+          - version: "RC_2_1"
             boost_major_version: "1"
-            boost_minor_version: "91"
+            boost_minor_version: "92"
             boost_patch_version: "0"
-            boost_sha256: "5734305f40a76c30f951c9abd409a45a2a19fb546efe4162119250bbe4d3a463"
             libt_build_flags: ""
-          - version: "2.0.15"
-            boost_major_version: "1"
-            boost_minor_version: "91"
-            boost_patch_version: "0"
-            boost_sha256: "5734305f40a76c30f951c9abd409a45a2a19fb546efe4162119250bbe4d3a463"
-            libt_build_flags: ""
-          - version: "1.2.20"
-            boost_major_version: "1"
-            boost_minor_version: "86"
-            boost_patch_version: "0"
-            boost_sha256: "2575e74ffc3ef1cd0babac2c1ee8bdb5782a0ee672b1912da40e5b4b591ca01f"
-            libt_build_flags: ""
-        qt_version: ["6.10.3"]
+        qt_version: ["6.12.0"]
         config:
         - os: windows-latest
           arch: x64
@@ -109,15 +97,12 @@ jobs:
           $boost_url="https://archives.boost.io/release/${{ matrix.libtorrent.boost_major_version }}.${{ matrix.libtorrent.boost_minor_version }}.${{ matrix.libtorrent.boost_patch_version }}/source/boost_${{ matrix.libtorrent.boost_major_version }}_${{ matrix.libtorrent.boost_minor_version }}_${{ matrix.libtorrent.boost_patch_version }}.tar.gz"
           $boost_url2="https://sourceforge.net/projects/boost/files/boost/${{ matrix.libtorrent.boost_major_version }}.${{ matrix.libtorrent.boost_minor_version }}.${{ matrix.libtorrent.boost_patch_version }}/boost_${{ matrix.libtorrent.boost_major_version }}_${{ matrix.libtorrent.boost_minor_version }}_${{ matrix.libtorrent.boost_patch_version }}.tar.gz"
           curl -L -o "${{ runner.temp }}/boost.tar.gz" "$boost_url"
-          if ((Get-FileHash -Algorithm SHA256 "${{ runner.temp }}/boost.tar.gz" -ErrorAction SilentlyContinue).Hash -ne "${{ matrix.libtorrent.boost_sha256 }}")
+          tar -xf "${{ runner.temp }}/boost.tar.gz" -C "${{ github.workspace }}/.."
+          if ($LastExitCode -ne 0)
           {
             curl -L -o "${{ runner.temp }}/boost.tar.gz" "$boost_url2"
-            if ((Get-FileHash -Algorithm SHA256 "${{ runner.temp }}/boost.tar.gz").Hash -ne "${{ matrix.libtorrent.boost_sha256 }}")
-            {
-              throw "boost.tar.gz does not match its expected SHA-256"
-            }
+            tar -xf "${{ runner.temp }}/boost.tar.gz" -C "${{ github.workspace }}/.."
           }
-          tar -xf "${{ runner.temp }}/boost.tar.gz" -C "${{ github.workspace }}/.."
           move "${{ github.workspace }}/../boost_*" "${{ env.boost_path }}"
           cd "${{ env.boost_path }}"
           #.\bootstrap.bat
@@ -135,11 +120,12 @@ jobs:
           archives: qtbase qtsvg qttools
           modules: qtimageformats
           cache: true
+          aqtsource: 'git+https://github.com/miurahr/aqtinstall.git'
 
       - name: Install libtorrent
         run: |
           git clone `
-            --branch v${{ matrix.libtorrent.version }} `
+            --branch ${{ matrix.libtorrent.version }} `
             --depth 1 `
             --recurse-submodules `
             https://github.com/arvidn/libtorrent.git `
@@ -238,7 +224,7 @@ jobs:
       - name: Install NSIS
         uses: repolevedavaj/install-nsis@65a75ea79c3d1ddde868e98b7f9447e2e623401c # v1.3.0
         with:
-          nsis-version: '3.12'
+          nsis-version: '3.13'
 
       - name: Create installer
         run: |
